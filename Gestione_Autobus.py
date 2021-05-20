@@ -1,10 +1,14 @@
 import pandas as pd
 import numpy as np
 import mip
+#from Demos.win32console_demo import z
+
 
 # <<<<<<<<<<<<<  header  >>>>>>>>>>>>>>>
 
 # definizioni costanti fittizzie
+
+
 COUNTED_PASSENGERS = 0
 EXTRA_PASSENGERS = 1
 INITIAL_STOP = 2
@@ -39,16 +43,25 @@ print(timedelay)
 print(n_di_tratte[0])
 print(f"Da {tempi_vuoto[2][0]} a {tempi_vuoto[0][4]} il tempo di percorrenza è {tempi_vuoto[4][2]} minuti ")
 
+
 # <<<<<<<<<<<<< Modello mip >>>>>>>>>>>>>
 
 modello = mip.Model()
 
-xij = modello.add_var(var_type=mip.BINARY)
-zj = modello.add_var(var_type=mip.INTEGER)
+x = np.array([modello.add_var(var_type=mip.BINARY) for i in range(0,n_di_tratte[0]*K_AUTOBUS)])
+z = np.array([modello.add_var(var_type=mip.INTEGER) for i in range(0,K_AUTOBUS)])
 
-for j in range(0,K_AUTOBUS)
-for i in range(1,n_di_tratte[0]):
-    modello.add_constr(xij*(Tratte[i][INITIAL_STOP]))
+dimensionex = x.shape
+dimensionez = z.shape
+print(f"la dimensione della x è {dimensionex} e della z {dimensionez}")
+
+
+#for j in range(0,K_AUTOBUS):
+ #   z[j] = modello.add_var(var_type=mip.INTEGER)
+
+#for j in range(0,K_AUTOBUS):
+#    for i in range(1,n_di_tratte[0]):
+#        modello.add_constr(xij*(Tratte[i][INITIAL_STOP]))
 
 
 #m.objective = mip.maximize(110*x1 + 130*x2)
