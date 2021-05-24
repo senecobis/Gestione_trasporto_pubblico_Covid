@@ -112,10 +112,16 @@ modello = mip.Model()
 
 # per ogni autobus abbiamo 157 variabili che rappresentano le tratte a cui possono sono assegnati
 
-x = np.array([modello.add_var(var_type=mip.BINARY) for i in range(0, n_di_tratte * K_AUTOBUS)])
+#x = np.array([modello.add_var(var_type=mip.BINARY) for i in range(0, n_di_tratte * K_AUTOBUS)])
 
-dimensionex = x.shape
-# print(f"la dimensione della x è {dimensionex}")
+x = []
+for k in range(n_di_tratte):
+    x.append([modello.add_var(var_type=mip.BINARY) for i in range(K_AUTOBUS)])
+
+# x è un array di array python che ha come primo campo le tratte e come secondo gli autobus
+
+#dimensionex = x
+#print(f"la dimensione della x è {dimensionex}")
 
 # vincoli
 # k è un indice che va da 0 a K_AUTOBUS*157 per assecondare come sono definite le varibili
@@ -126,7 +132,7 @@ indice_luogo_desiderato = 2
 t_di_stop = Tratte[1][FINAL_TIME]
 
 for j in range(0, K_AUTOBUS):
-    t_tratta_prec = 0
+    t_di_stop = 0
     for i in range(1, 157):
         #print(f"numero {i} iterazione")
 
@@ -145,9 +151,9 @@ for j in range(0, K_AUTOBUS):
 
         #print(f"la key è {luogo_desiderato}")
 
-        modello.add_constr(x[k] * t_di_start >= x[k] * (t_di_stop + tempo_per_arrivarci))
+        modello.add_constr(x[i][j] * t_di_start >= x[i][j] * (t_di_stop + tempo_per_arrivarci))
 
-        if x[k] == 1:
+        if x[i][j] == 1:
             # tempi e luoghi di stop relativi all'ultima iterazione in cui la variabile era 1
             luogo_di_stop = Tratte[i][FINAL_STOP]
             indice_luogo_stop = luoghi[luogo_di_stop]
@@ -155,11 +161,13 @@ for j in range(0, K_AUTOBUS):
 
         k += 1
 
+# vincolo 2
+for i in range(n_di_tratte):
+    modello.add_constr( mip.xsum(x[i][j] for j in range(K_AUTOBUS)) == 1 )
 
 
-print(Tratte[1][EXTRA_PASSENGERS])
 
 # funzione obiettivo
-for i in range(1, K_AUTOBUS * n_di_tratte):
-    modello.objective = mip.maximize(mip.xsum(x[i]*Tratte[j][EXTRA_PASSENGERS] for j in range(1,n_di_tratte) ))
+for i in range(1,n_di_tratte):
+    modello.objective = mip.maximize(mip.xsum(x[i][j]*Tratte[i][EXTRA_PASSENGERS] for j in range(0,K_AUTOBUS) ))
 
